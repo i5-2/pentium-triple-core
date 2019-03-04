@@ -9,7 +9,7 @@ at the University of Edinburgh.
 import traceback
 from sys import stdin, stdout, stderr
 from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, PASS, \
-                       MAXSIZE, coord_to_point
+                       MAXSIZE, coord_to_point, RANDOM_POLICY, RULE_BASED_POLICY
 import numpy as np
 import re
 
@@ -49,7 +49,9 @@ class GtpConnection():
             "gogui-rules_side_to_move": self.gogui_rules_side_to_move_cmd,
             "gogui-rules_board": self.gogui_rules_board_cmd,
             "gogui-rules_final_result": self.gogui_rules_final_result_cmd,
-            "gogui-analyze_commands": self.gogui_analyze_cmd
+            "gogui-analyze_commands": self.gogui_analyze_cmd,
+            "policy": self.policy_cmd,
+            "policy_moves": self.policy_moves_cmd
         }
 
         # used for argument checking
@@ -346,6 +348,20 @@ class GtpConnection():
                      "pstring/Rules GameID/gogui-rules_game_id\n"
                      "pstring/Show Board/gogui-rules_board\n"
                      )
+
+    def policy_cmd(self, args):
+        try:
+            policy = args[0]
+            if (policy != RANDOM_POLICY and policy != RULE_BASED_POLICY):
+               raise ValueError 
+        except:
+            self.respond("This is an invalid policy, it can only one of: %s, %s" % (RANDOM_POLICY, RULE_BASED_POLICY))
+            return
+        self.board.set_policy(policy)
+
+    def policy_moves_cmd(self, args):
+        policy_moves = self.board.get_policy_moves()
+        self.respond(policy_moves)
 
 def point_to_coord(point, boardsize):
     """

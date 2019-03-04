@@ -14,6 +14,9 @@ BLACK = 1
 WHITE = 2
 BORDER = 3
 
+RANDOM_POLICY = "random"
+RULE_BASED_POLICY = "rule_based"
+
 def is_black_white(color):
     return color == BLACK or color == WHITE
 """
@@ -132,6 +135,14 @@ class GoBoardUtil(object):
         if len(moves) == 0:
             return PASS
         np.random.shuffle(moves)
+        return moves[0]
+
+    @staticmethod
+    def generate_simulated_move(board):
+        moves = board.get_empty_points()
+        if len(moves) == 0:
+            return PASS
+        # TODO
         return moves[0]
 
     @staticmethod       

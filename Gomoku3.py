@@ -18,7 +18,6 @@ class Gomoku():
         self.version = 1.0
         
     def get_move(self, board, color):
-        # TODO: simulation based
         return GoBoardUtil.generate_random_move_gomoku(board)
     
 def run():

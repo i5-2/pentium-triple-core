@@ -12,7 +12,7 @@ The board uses a 1-dimensional representation with padding
 import numpy as np
 from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, \
                        PASS, is_black_white, coord_to_point, where1d, \
-                       MAXSIZE, NULLPOINT
+                       MAXSIZE, NULLPOINT, RANDOM_POLICY, RULE_BASED_POLICY
 
 class SimpleGoBoard(object):
 
@@ -86,6 +86,7 @@ class SimpleGoBoard(object):
         self.liberty_of = np.full(self.maxpoint, NULLPOINT, dtype = np.int32)
         self._initialize_empty_points(self.board)
         self._initialize_neighbors()
+        self.policy = RANDOM_POLICY
 
     def copy(self):
         b = SimpleGoBoard(self.size)
@@ -95,6 +96,7 @@ class SimpleGoBoard(object):
         b.current_player = self.current_player
         assert b.maxpoint == self.maxpoint
         b.board = np.copy(self.board)
+        b.policy = self.policy
         return b
 
     def row_start(self, row):
@@ -418,3 +420,10 @@ class SimpleGoBoard(object):
                 return True, BLACK
 
         return False, None
+
+    def set_policy(self, policy):
+        self.policy = policy
+
+    def get_policy_moves(self):
+        # TODO
+        return []
