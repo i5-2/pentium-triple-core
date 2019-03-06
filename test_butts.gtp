@@ -1,5 +1,3 @@
-# Tests for the policy_moves command
-
 # Test the basic random policy
 policy random
 clear_board

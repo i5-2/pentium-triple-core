@@ -24,9 +24,16 @@ class Gomoku():
     # Returns tuple: (MoveType, [moves])
     # MoveType = {Win, BlockWin, OpenFour, BlockOpenFour, Random}
     def get_policy_moves(self, board, useRules=True):
-        if (not useRules):
-            return "Random", GoBoardUtil.generate_legal_moves_gomoku(board)
-        return GoBoardUtil.generate_rulebased_moves(board, color)
+        if (useRules):
+            MoveType, moves = GoBoardUtil.generate_rule_based_moves(board)
+            if (MoveType != "Random"):
+                return MoveType, moves
+        # if we're not using rules
+        # or generate_rule_based_moves(..) returned nothing
+        moves = GoBoardUtil.generate_legal_moves_gomoku(board)
+        if (len(moves) > 0):
+            return "Random", moves
+        return "", []
     
 def run():
     """
