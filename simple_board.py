@@ -36,16 +36,22 @@ winDict = {
 # These moves can turn into an OPEN4
 # AKA "if it's my turn I win in 2 moves (no matter what)"
 threatDict = {
-    ".x.xx.": (True, 3),
-    ".xx.x.": (True, 2),
-    ".xxx..": (True, 1),
-    "..xxx.": (True, 4),
+    ".x.xx.": (True, [3]),
+    ".xx.x.": (True, [2]),
+    ".xxx..": (True, [1]),
+    "..xxx.": (True, [4]),
 
     # must block these, if have none of the above
-    ".o.oo.": (False, 3),
-    ".oo.o.": (False, 2),
-    ".ooo..": (False, 1),
-    "..ooo.": (False, 4),
+    ".o.oo.": (False, [3]),
+    ".oo.o.": (False, [2]),
+    # Big note: the two moves are not the best play
+    # you should play the first move! 
+    # this is a compromise for the CMPUT496 class
+    # see that if you play the single open space side, 
+    # you will be forced into playing a potential win-threat
+    # while the opponent makes off with a free move.
+    ".ooo..": (False, [1,5]),
+    "..ooo.": (False, [4,0]),
 }
 
 class SimpleGoBoard(object):
@@ -468,9 +474,12 @@ class SimpleGoBoard(object):
             #print("found threat", s)
             threat = d[s]
             if threat[0]:
-                cpList.append(p - (threat[1] * step))
+                # this is not the best see top-file comment
+                for m in threat[1]:
+                    cpList.append(p - (m * step))
             else:
-                opList.append(p - (threat[1] * step))
+                for m in threat[1]:
+                    opList.append(p - (m * step))
 
     # dict to look up, winStr, player's list, opponent's list, point to add
     def checkWin(self, d, s, cpList, opList, p, step):
