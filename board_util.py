@@ -138,6 +138,10 @@ class GoBoardUtil(object):
         return moves[0]
 
     @staticmethod
+    def generate_rulebased_moves(board, color):
+        return "Random", []
+
+    @staticmethod
     def generate_simulated_move(board):
         moves = board.get_empty_points()
         if len(moves) == 0:

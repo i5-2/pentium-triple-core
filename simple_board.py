@@ -421,9 +421,6 @@ class SimpleGoBoard(object):
 
         return False, None
 
-    def set_policy(self, policy):
-        self.policy = policy
-
     def get_policy_moves(self):
         # TODO
         return []

@@ -19,6 +19,14 @@ class Gomoku():
         
     def get_move(self, board, color):
         return GoBoardUtil.generate_random_move_gomoku(board)
+
+    # Generates a list of moves based on the current policies
+    # Returns tuple: (MoveType, [moves])
+    # MoveType = {Win, BlockWin, OpenFour, BlockOpenFour, Random}
+    def get_policy_moves(self, board, useRules=True):
+        if (not useRules):
+            return "Random", GoBoardUtil.generate_legal_moves_gomoku(board)
+        return GoBoardUtil.generate_rulebased_moves(board, color)
     
 def run():
     """

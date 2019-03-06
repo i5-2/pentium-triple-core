@@ -29,6 +29,7 @@ class GtpConnection():
         self._debug_mode = debug_mode
         self.go_engine = go_engine
         self.board = board
+        self.policy = RANDOM_POLICY
         self.commands = {
             "protocol_version": self.protocol_version_cmd,
             "quit": self.quit_cmd,
@@ -63,7 +64,8 @@ class GtpConnection():
             "known_command": (1, 'Usage: known_command CMD_NAME'),
             "genmove": (1, 'Usage: genmove {w,b}'),
             "play": (2, 'Usage: play {b,w} MOVE'),
-            "legal_moves": (1, 'Usage: legal_moves {w,b}')
+            "legal_moves": (1, 'Usage: legal_moves {w,b}'),
+            "policy": (1, 'Usage: policy {random, rulebased}'),
         }
     
     def write(self, data):
@@ -357,11 +359,19 @@ class GtpConnection():
         except:
             self.respond("This is an invalid policy, it can only one of: %s, %s" % (RANDOM_POLICY, RULE_BASED_POLICY))
             return
-        self.board.set_policy(policy)
+
+        self.policy = policy
+        self.respond()
 
     def policy_moves_cmd(self, args):
-        policy_moves = self.board.get_policy_moves()
-        self.respond(policy_moves)
+        moveType, moves = self.go_engine.get_policy_moves(self.board, self.policy == RULE_BASED_POLICY)
+        for i in range(len(moves)):
+            coords = point_to_coord(moves[i], self.board.size)
+            move = format_point(coords)
+            moves[i] = move
+        moves.sort()
+        resp = "{MOVE_TYPE} {MOVES}".format(MOVE_TYPE=moveType, MOVES=" ".join(moves))
+        self.respond(resp)
 
 def point_to_coord(point, boardsize):
     """
