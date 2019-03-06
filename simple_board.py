@@ -9,6 +9,7 @@ Implements a basic Go board with functions to:
 The board uses a 1-dimensional representation with padding
 """
 
+import random
 import numpy as np
 from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, \
                        PASS, is_black_white, coord_to_point, where1d, \
@@ -581,3 +582,43 @@ class SimpleGoBoard(object):
             reduceDSize = not reduceDSize
 
         return myWins, theirWins, my2mWins, their2mWins
+
+    # returns true if the simulation results in a win
+    def simulate(self, pov, useRules=True):
+        moves = []
+        if useRules:
+            wins, theirWins, oFours, theirFours = self.scan_board()
+            if (len(wins) > 0):
+                moves = wins
+            elif (len(theirWins) > 0):
+                moves = theirWins
+            elif (len(oFours) > 0):
+                moves = oFours
+            elif (len(theirFours) > 0):
+                moves = theirFours
+            else:
+                moves = self.get_empty_points()
+        else:
+            moves = self.get_empty_points()
+
+        if len(moves) == 0:
+            return False # draws are not wins, so return False
+
+        # pick and place a random move
+        move = random.choice(moves)
+        self.board[move] = self.current_player
+
+        # check if the game ended because of this play
+        if self.point_check_game_end_gomoku(move):
+            self.board[move] = EMPTY
+            # True if current_player was the pov
+            return self.current_player == pov
+
+        # switch current player to opponent
+        self.current_player = GoBoardUtil.opponent(self.current_player)
+        result = self.simulate(useRules)
+        # return player to original player
+        self.current_player = GoBoardUtil.opponent(self.current_player)
+        self.board[move] = EMPTY
+
+        return result

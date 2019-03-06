@@ -262,7 +262,15 @@ class GtpConnection():
             else:
                 self.respond("resign")
             return
-        move = self.go_engine.get_move(self.board, color)
+        # assignment 3 code
+        empty_points = self.board.get_empty_points()
+        print("empty points", empty_points)
+        if len(empty_points) == 0:
+            # must print pass because it is a draw
+            self.respond("pass")
+            return
+        move = self.go_engine.get_mc_move(self.board, color, self.policy == RULE_BASED_POLICY)
+        # end assignment 3 code
         if move == PASS:
             self.respond("pass")
             return
