@@ -264,7 +264,7 @@ class GtpConnection():
             return
         # assignment 3 code
         empty_points = self.board.get_empty_points()
-        print("empty points", empty_points)
+        #print("empty points", empty_points)
         if len(empty_points) == 0:
             # must print pass because it is a draw
             self.respond("pass")
