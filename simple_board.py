@@ -9,10 +9,50 @@ Implements a basic Go board with functions to:
 The board uses a 1-dimensional representation with padding
 """
 
+import random
 import numpy as np
 from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, \
                        PASS, is_black_white, coord_to_point, where1d, \
                        MAXSIZE, NULLPOINT, RANDOM_POLICY, RULE_BASED_POLICY
+
+# 1 move wins
+# AKA "my turn my win"
+# note that .xxxx. will be detected by both .xxxx and xxxx.
+winDict = {
+    "x.xxx": True,
+    "xx.xx": True,
+    "xxx.x": True,
+    ".xxxx": True,
+    "xxxx.": True,
+
+    # must block these, if have none of the above
+    "o.ooo": False,
+    "oo.oo": False,
+    "ooo.o": False,
+    ".oooo": False,
+    "oooo.": False,
+}
+
+# These moves can turn into an OPEN4
+# AKA "if it's my turn I win in 2 moves (no matter what)"
+threatDict = {
+    ".x.xx.": (True, [3]),
+    ".xx.x.": (True, [2]),
+    ".xxx..": (True, [1]),
+    "..xxx.": (True, [4]),
+
+    # must block these, if have none of the above
+    ".o.oo.": (False, [3]),
+    ".oo.o.": (False, [2]),
+    # Big note: the two moves are not the best play
+    # you should play the first move! 
+    # this is a compromise for the CMPUT496 class
+    # see that if you play the single open space side, 
+    # you will be forced into playing a potential win-threat
+    # while the opponent makes off with a free move.
+    ".ooo..": (False, [1,5]),
+    "..ooo.": (False, [4,0]),
+}
 
 class SimpleGoBoard(object):
 
@@ -406,8 +446,8 @@ class SimpleGoBoard(object):
     
     def check_game_end_gomoku(self):
         """
-            Check if the game ends for the game of Gomoku.
-            """
+        Check if the game ends for the game of Gomoku.
+        """
         white_points = where1d(self.board == WHITE)
         black_points = where1d(self.board == BLACK)
         
@@ -420,10 +460,174 @@ class SimpleGoBoard(object):
                 return True, BLACK
 
         return False, None
+    
+    # Turns a board point into a representation character
+    def getPointRep(self, cp, point):
+        return "x" if self.board[point] == cp \
+            else "." if self.board[point] == EMPTY \
+            else "#" if self.board[point] == BORDER \
+            else "o"
 
-    def set_policy(self, policy):
-        self.policy = policy
+    # Dict to look up, winStr, player's list, opponent's list, point to add
+    def checkThreat(self, d, s, cpList, opList, p, step):
+        if s in d:
+            #print("found threat", s)
+            threat = d[s]
+            if threat[0]:
+                # this is not the best see top-file comment
+                for m in threat[1]:
+                    cpList.append(p - (m * step))
+            else:
+                for m in threat[1]:
+                    opList.append(p - (m * step))
 
-    def get_policy_moves(self):
-        # TODO
-        return []
+    # dict to look up, winStr, player's list, opponent's list, point to add
+    def checkWin(self, d, s, cpList, opList, p, step):
+        if s in d:
+            #print("found win", s)
+            p = p + (s.index(".")-4)*step
+            if d[s]:
+                cpList.append(p)
+                return True
+            else:
+                opList.append(p)
+
+    def scan_board(self):
+        myWins = []
+        theirWins = []
+        my2mWins = []
+        their2mWins = []
+
+        size = self.size
+        startPoint = size + 2
+
+        points = where1d(self.board == self.current_player)
+
+        # Horizontal Checks
+        for rowStart in range(startPoint, startPoint + size*size + 1, size+1):
+            winStr = ""
+            for point in range(rowStart, rowStart + size):
+                winStr += self.getPointRep(self.current_player, point)
+                # check 2-move wins
+                if len(winStr) == 6:
+                    self.checkThreat(threatDict, winStr, my2mWins, their2mWins, point, 1)
+                    # reduce the string to a 5-long string
+                    winStr = winStr[1:]
+                # check for 1-move wins
+                if len(winStr) == 5:
+                    self.checkWin(winDict, winStr, myWins, theirWins, point, 1)
+
+        # Vertical Checks
+        for colStart in range(startPoint, startPoint + size):
+            winStr = ""
+            for point in range(colStart, colStart + (size+1)*(size-1) + 1, size+1):
+                winStr += self.getPointRep(self.current_player, point)
+                # check 2-move wins
+                if len(winStr) == 6:
+                    self.checkThreat(threatDict, winStr, my2mWins, their2mWins, point, size+1)
+                    winStr = winStr[1:]
+                # check for 1-move wins
+                if len(winStr) == 5:
+                    self.checkWin(winDict, winStr, myWins, theirWins, point, size+1)
+
+        # diagonal I
+        exists = size - 5
+        checkRight = startPoint + 1
+        checkDown = startPoint + size + 1
+        dIStarts = [startPoint]
+        for i in range(0, exists):
+            dIStarts.append(checkDown)
+            dIStarts.append(checkRight)
+            checkRight += 1
+            checkDown += size+1
+        dSize = size
+        reduceDSize = True
+        for start in dIStarts:
+            point = start
+            winStr = ""
+            for i in range(0, dSize):
+                winStr += self.getPointRep(self.current_player, point)
+                # check 2-move wins
+                if len(winStr) == 6:
+                    self.checkThreat(threatDict, winStr, my2mWins, their2mWins, point, size+2)
+                    winStr = winStr[1:]
+                # check for 1-move wins
+                if len(winStr) == 5:
+                    self.checkWin(winDict, winStr, myWins, theirWins, point, size+2)
+
+                point += size+2
+            if reduceDSize:
+                dSize -= 1
+            reduceDSize = not reduceDSize
+
+        # diagonal II
+        checkLeft = startPoint + (size-1) - 1
+        checkDown = startPoint + (size-1) + (size+1)
+        dIIStarts = [startPoint + size - 1]
+        exists = size - 5
+        for i in range(0, exists):
+            dIIStarts.append(checkLeft)
+            dIIStarts.append(checkDown)
+            checkLeft -= 1
+            checkDown += size+1
+        dSize = size
+        reduceDSize = True
+        for start in dIIStarts:
+            point = start
+            winStr = ""
+            for i in range(0, dSize):
+                winStr += self.getPointRep(self.current_player, point)
+                # check 2-move wins
+                if len(winStr) == 6:
+                    self.checkThreat(threatDict, winStr, my2mWins, their2mWins, point, size)
+                    winStr = winStr[1:]
+                # check for 1-move wins
+                if len(winStr) == 5:
+                    self.checkWin(winDict, winStr, myWins, theirWins, point, size)
+
+                point += size
+            if reduceDSize:
+                dSize -= 1
+            reduceDSize = not reduceDSize
+
+        return myWins, theirWins, my2mWins, their2mWins
+
+    # returns true if the simulation results in a win
+    def simulate(self, pov, useRules=True):
+        moves = []
+        if useRules:
+            wins, theirWins, oFours, theirFours = self.scan_board()
+            if (len(wins) > 0):
+                moves = wins
+            elif (len(theirWins) > 0):
+                moves = theirWins
+            elif (len(oFours) > 0):
+                moves = oFours
+            elif (len(theirFours) > 0):
+                moves = theirFours
+            else:
+                moves = self.get_empty_points()
+        else:
+            moves = self.get_empty_points()
+
+        if len(moves) == 0:
+            return False # draws are not wins, so return False
+
+        # pick and place a random move
+        move = random.choice(moves)
+        self.board[move] = self.current_player
+
+        # check if the game ended because of this play
+        if self.point_check_game_end_gomoku(move):
+            self.board[move] = EMPTY
+            # True if current_player was the pov
+            return self.current_player == pov
+
+        # switch current player to opponent
+        self.current_player = GoBoardUtil.opponent(self.current_player)
+        result = self.simulate(useRules)
+        # return player to original player
+        self.current_player = GoBoardUtil.opponent(self.current_player)
+        self.board[move] = EMPTY
+
+        return result

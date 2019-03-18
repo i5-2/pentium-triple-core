@@ -138,6 +138,20 @@ class GoBoardUtil(object):
         return moves[0]
 
     @staticmethod
+    def generate_rule_based_moves(board):
+        wins, theirWins, oFours, theirFours = board.scan_board()
+
+        if (len(wins) > 0):
+            return "Win", wins
+        elif (len(theirWins) > 0):
+            return "BlockWin", theirWins
+        elif (len(oFours) > 0):
+            return "OpenFour", oFours
+        elif (len(theirFours) > 0):
+            return "BlockOpenFour", theirFours
+        return "Random", []
+
+    @staticmethod
     def generate_simulated_move(board):
         moves = board.get_empty_points()
         if len(moves) == 0:
