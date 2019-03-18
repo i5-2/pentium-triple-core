@@ -54,6 +54,13 @@ threatDict = {
     "..ooo.": (False, [4,0]),
 }
 
+specialBlockFourDict = {
+    "..ooo.x": 6,
+    "..ooo.#": 6,
+    "x.ooo..": 0,
+    "#.ooo..": 0
+}
+
 class SimpleGoBoard(object):
 
     def get_color(self, point):
@@ -505,30 +512,46 @@ class SimpleGoBoard(object):
 
         # Horizontal Checks
         for rowStart in range(startPoint, startPoint + size*size + 1, size+1):
-            winStr = ""
+            winStr = "#" # start with border to get track specials
             for point in range(rowStart, rowStart + size):
                 winStr += self.getPointRep(self.current_player, point)
+                if len(winStr) >= 7:
+                    #print(winStr[-7:])
+                    if winStr[-7:] in specialBlockFourDict:
+                        adj = specialBlockFourDict[winStr[-7:]]
+                        their2mWins.append(point - adj)
+
                 # check 2-move wins
-                if len(winStr) == 6:
-                    self.checkThreat(threatDict, winStr, my2mWins, their2mWins, point, 1)
-                    # reduce the string to a 5-long string
-                    winStr = winStr[1:]
+                if len(winStr) >= 6:
+                    self.checkThreat(threatDict, winStr[-6:], my2mWins, their2mWins, point, 1)
+                    
                 # check for 1-move wins
-                if len(winStr) == 5:
-                    self.checkWin(winDict, winStr, myWins, theirWins, point, 1)
+                if len(winStr) >= 5:
+                    self.checkWin(winDict, winStr[-5:], myWins, theirWins, point, 1)
+            # account for final border
+            winStr += "#"
+            if len(winStr) >= 7:
+                if winStr[-7:] in specialBlockFourDict:
+                        adj = specialBlockFourDict[winStr[-7:]]-1
+                        their2mWins.append(point - adj)
 
         # Vertical Checks
         for colStart in range(startPoint, startPoint + size):
-            winStr = ""
-            for point in range(colStart, colStart + (size+1)*(size-1) + 1, size+1):
+            winStr = "#"
+            for point in range(colStart, colStart + (size+1)*(size-1) + (size+2), size+1):
                 winStr += self.getPointRep(self.current_player, point)
+                if len(winStr) >= 7:
+                    #print(winStr[-7:])
+                    if winStr[-7:] in specialBlockFourDict:
+                        i = specialBlockFourDict[winStr[-7:]]
+                        adj = i * (size+1)
+                        their2mWins.append(point - adj)
                 # check 2-move wins
-                if len(winStr) == 6:
-                    self.checkThreat(threatDict, winStr, my2mWins, their2mWins, point, size+1)
-                    winStr = winStr[1:]
+                if len(winStr) >= 6:
+                    self.checkThreat(threatDict, winStr[-6:], my2mWins, their2mWins, point, size+1)
                 # check for 1-move wins
-                if len(winStr) == 5:
-                    self.checkWin(winDict, winStr, myWins, theirWins, point, size+1)
+                if len(winStr) >= 5:
+                    self.checkWin(winDict, winStr[-5:], myWins, theirWins, point, size+1)
 
         # diagonal I
         exists = size - 5
@@ -544,18 +567,27 @@ class SimpleGoBoard(object):
         reduceDSize = True
         for start in dIStarts:
             point = start
-            winStr = ""
+            winStr = "#"
             for i in range(0, dSize):
                 winStr += self.getPointRep(self.current_player, point)
                 # check 2-move wins
-                if len(winStr) == 6:
-                    self.checkThreat(threatDict, winStr, my2mWins, their2mWins, point, size+2)
-                    winStr = winStr[1:]
+                if len(winStr) >= 7:
+                    if winStr[-7:] in specialBlockFourDict:
+                        i = specialBlockFourDict[winStr[-7:]]
+                        adj = i * (size+2)
+                        their2mWins.append(point - adj)
+                if len(winStr) >= 6:
+                    self.checkThreat(threatDict, winStr[-6:], my2mWins, their2mWins, point, size+2)
                 # check for 1-move wins
-                if len(winStr) == 5:
-                    self.checkWin(winDict, winStr, myWins, theirWins, point, size+2)
-
+                if len(winStr) >= 5:
+                    self.checkWin(winDict, winStr[-5:], myWins, theirWins, point, size+2)
                 point += size+2
+            winStr += "#"
+            if len(winStr) >= 7:
+                    if winStr[-7:] in specialBlockFourDict:
+                        i = specialBlockFourDict[winStr[-7:]]
+                        adj = i * (size+2)
+                        their2mWins.append(point - adj)
             if reduceDSize:
                 dSize -= 1
             reduceDSize = not reduceDSize
@@ -574,21 +606,37 @@ class SimpleGoBoard(object):
         reduceDSize = True
         for start in dIIStarts:
             point = start
-            winStr = ""
+            winStr = "#"
             for i in range(0, dSize):
                 winStr += self.getPointRep(self.current_player, point)
                 # check 2-move wins
-                if len(winStr) == 6:
-                    self.checkThreat(threatDict, winStr, my2mWins, their2mWins, point, size)
-                    winStr = winStr[1:]
+                if len(winStr) >= 7:
+                    if winStr[-7:] in specialBlockFourDict:
+                        i = specialBlockFourDict[winStr[-7:]]
+                        adj = i * (size+2)
+                        their2mWins.append(point - adj)
+                # check 2-move wins
+                if len(winStr) >= 6:
+                    self.checkThreat(threatDict, winStr[-6:], my2mWins, their2mWins, point, size)
                 # check for 1-move wins
-                if len(winStr) == 5:
-                    self.checkWin(winDict, winStr, myWins, theirWins, point, size)
+                if len(winStr) >= 5:
+                    self.checkWin(winDict, winStr[-5:], myWins, theirWins, point, size)
 
                 point += size
+            winStr += "#"
+            if len(winStr) >= 7:
+                if winStr[-7:] in specialBlockFourDict:
+                    i = specialBlockFourDict[winStr[-7:]]
+                    adj = i * (size)
+                    their2mWins.append(point - adj)
             if reduceDSize:
                 dSize -= 1
             reduceDSize = not reduceDSize
+
+        myWins = list(set(myWins))
+        theirWins = list(set(theirWins))
+        my2mWins = list(set(my2mWins))
+        their2mWins = list(set(their2mWins))
 
         return myWins, theirWins, my2mWins, their2mWins
 

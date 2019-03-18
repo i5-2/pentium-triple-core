@@ -1,0 +1,84 @@
+policy rule_based
+
+# original special
+clear_board
+boardsize 8
+play B D2
+play W A2
+play B D3
+play W A3
+play B D4
+gogui-rules_board
+10 policy_moves
+#?[BlockOpenFour D1 D5 D6]
+
+# left side special
+clear_board
+boardsize 8
+play B B3
+play B C3
+play B D3
+gogui-rules_board
+20 policy_moves
+#?[BlockOpenFour A3 E3 F3]
+
+# top special
+clear_board
+boardsize 8
+play B H7
+play B H6
+play B H5
+gogui-rules_board
+30 policy_moves
+#?[BlockOpenFour H3 H4 H8]
+
+# right special
+clear_board
+boardsize 8
+play B F6
+play B G6
+play B E6
+gogui-rules_board
+40 policy_moves
+#?[BlockOpenFour C6 D6 H6]
+
+# center of board
+clear_board
+boardsize 8
+play W G6
+play B C6
+play B D6
+play B E6
+gogui-rules_board
+50 policy_moves
+#?[BlockOpenFour A6 B6 F6]
+
+# vertical corner (bottom)
+clear_board
+boardsize 8
+play B H4
+play B H3
+play B H2
+gogui-rules_board
+60 policy_moves
+#?[BlockOpenFour H1 H5 H6]
+
+# diagonal (l to r) because fook me
+clear_board
+boardsize 8
+play B F2
+play B E3
+play B D4
+gogui-rules_board
+70 policy_moves
+#?[BlockOpenFour B6 C5 G1]
+
+# diagonal (r to l) because fook me
+clear_board
+boardsize 8
+play B G7
+play B F6
+play B E5
+gogui-rules_board
+70 policy_moves
+#?[BlockOpenFour C3 D4 H8]
