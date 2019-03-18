@@ -1,3 +1,8 @@
+# Authors
+hreherch (Bennett Hreherchuk) - 1399963
+meinders (Mandy Meindersma) - 1433871
+malik2 (Adil Malik) - 1477024
+
 # FlatMC Gomoku Project
 
 A Gomoku player for gogui that uses Flat Monte Carlo with

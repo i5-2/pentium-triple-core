@@ -47,7 +47,6 @@ play B A2
 play W F2
 play B E2
 play W G2
-gogui-rules_board
 10 policy_moves
 #?[OpenFour C1]
 
@@ -100,7 +99,6 @@ play B E1
 play W B2
 play B A2
 play W A1
-gogui-rules_board
 20 policy_moves
 #?[Random B1]
 
@@ -154,20 +152,16 @@ play B E1
 play W B2
 play B A2
 play W A1
-gogui-rules_board
 30 policy_moves
 #?[Random B1]
 
 play B B1
-gogui-rules_board
 40 policy_moves
 #?[]
 
-gogui-rules_board
 50 genmove W
 #?[pass]
 
-gogui-rules_board
 60 genmove B
 #?[pass]
 
@@ -181,24 +175,19 @@ play B B3
 play W C4
 play B B4
 
-gogui-rules_board
 70 policy_moves
 #?[BlockWin B5]
 
-gogui-rules_board
 80 genmove W
 #?[b5|B5]
 
 play B A1
-gogui-rules_board
 90 policy_moves
 #?[OpenFour C5]
 play W C5
 play B A2
-gogui-rules_board
 100 policy_moves
 #?[Win C1 C6]
-gogui-rules_board
 110 genmove W
 #?[C1|C6]
 
@@ -210,11 +199,9 @@ play B D3
 play W A3
 play B D4
 
-gogui-rules_board
 120 policy_moves
 #?[BlockOpenFour D1 D5]
 
-gogui-rules_board
 boardsize 6
 130 policy_moves
 #?[Random A1 A2 A3 A4 A5 A6 B1 B2 B3 B4 B5 B6 C1 C2 C3 C4 C5 C6 D1 D2 D3 D4 D5 D6 E1 E2 E3 E4 E5 E6 F1 F2 F3 F4 F5 F6] 
